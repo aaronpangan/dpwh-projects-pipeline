@@ -1,0 +1,61 @@
+[0m23:15:07.139989 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000021AAC553B50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000021AAC546C90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000021AAD57D710>]}
+
+
+============================== 23:15:07.151876 | 85583216-17c8-4094-a72c-5fbfa282d035 ==============================
+[0m23:15:07.151876 [info ] [MainThread]: Running with dbt=1.11.8
+[0m23:15:07.151876 [debug] [MainThread]: running dbt with arguments {'static_parser': 'True', 'no_print': 'None', 'version_check': 'True', 'target_path': 'None', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'printer_width': '80', 'write_json': 'True', 'introspect': 'True', 'log_cache_events': 'False', 'empty': 'None', 'cache_selected_only': 'False', 'log_format': 'default', 'debug': 'False', 'fail_fast': 'False', 'profiles_dir': 'C:\\Users\\aaron\\.dbt', 'send_anonymous_usage_stats': 'True', 'quiet': 'False', 'warn_error': 'None', 'partial_parse': 'True', 'invocation_command': 'dbt init', 'indirect_selection': 'eager', 'use_colors': 'True', 'use_experimental_parser': 'False', 'log_path': 'logs'}
+[0m23:15:50.082633 [debug] [MainThread]: Starter project path: C:\Users\aaron\Desktop\dpwh-projects-pipeline\.venv\Lib\site-packages\dbt\include\starter_project
+[0m23:15:50.162285 [info ] [MainThread]: 
+Your new dbt project "dphw_projects_transform" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m23:15:50.163295 [info ] [MainThread]: Setting up your profile.
+[0m23:16:03.652567 [debug] [MainThread]: Snowflake adapter: Setting snowflake.connector to ERROR (file logging only)
+[0m23:16:03.653806 [debug] [MainThread]: Snowflake adapter: Setting botocore to ERROR (file logging only)
+[0m23:16:03.654806 [debug] [MainThread]: Snowflake adapter: Setting boto3 to ERROR (file logging only)
+[0m23:16:10.913782 [error] [MainThread]: Encountered an error:
+
+[0m23:16:10.918822 [error] [MainThread]: Traceback (most recent call last):
+  File "C:\Users\aaron\Desktop\dpwh-projects-pipeline\.venv\Lib\site-packages\dbt\cli\requires.py", line 182, in wrapper
+    result, success = func(*args, **kwargs)
+                      ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aaron\Desktop\dpwh-projects-pipeline\.venv\Lib\site-packages\dbt\cli\requires.py", line 128, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aaron\Desktop\dpwh-projects-pipeline\.venv\Lib\site-packages\dbt\cli\main.py", line 488, in init
+    results = task.run()
+              ^^^^^^^^^^
+  File "C:\Users\aaron\Desktop\dpwh-projects-pipeline\.venv\Lib\site-packages\dbt\task\init.py", line 346, in run
+    self.setup_profile(profile_name)
+  File "C:\Users\aaron\Desktop\dpwh-projects-pipeline\.venv\Lib\site-packages\dbt\task\init.py", line 262, in setup_profile
+    self.create_profile_from_target(adapter, profile_name=profile_name)
+  File "C:\Users\aaron\Desktop\dpwh-projects-pipeline\.venv\Lib\site-packages\dbt\task\init.py", line 179, in create_profile_from_target
+    self.create_profile_from_profile_template(profile_template, profile_name)
+  File "C:\Users\aaron\Desktop\dpwh-projects-pipeline\.venv\Lib\site-packages\dbt\task\init.py", line 163, in create_profile_from_profile_template
+    target = self.generate_target_from_input(prompts, initial_target)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aaron\Desktop\dpwh-projects-pipeline\.venv\Lib\site-packages\dbt\task\init.py", line 129, in generate_target_from_input
+    target[key] = click.prompt(
+                  ^^^^^^^^^^^^^
+  File "C:\Users\aaron\Desktop\dpwh-projects-pipeline\.venv\Lib\site-packages\click\termui.py", line 171, in prompt
+    value = prompt_func(prompt)
+            ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aaron\Desktop\dpwh-projects-pipeline\.venv\Lib\site-packages\click\termui.py", line 154, in prompt_func
+    raise Abort() from None
+click.exceptions.Abort
+
+[0m23:16:10.922354 [debug] [MainThread]: Command `dbt init` failed at 23:16:10.921343 after 63.96 seconds
+[0m23:16:10.923353 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000021AAD58DFD0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000021AAD58E710>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000021AA580BD50>]}
+[0m23:16:10.924354 [debug] [MainThread]: Flushing usage events
