@@ -1,13 +1,20 @@
+import io
+import os
 import time
 
+import boto3
 import curl_cffi.requests as requests
 import duckdb
 import pandas as pd
+import pyarrow.parquet as pq
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_URL = "https://api.transparency.dpwh.gov.ph/projects"
 LIMIT = 5000
-OUTPUT_PATH = "dpwh_projects_raw.parquet"
-DELAY_SECONDS = 2
+S3_KEY = "raw/dpwh_projects_raw.parquet"
+DELAY_SECONDS = 3
 
 HEADERS = {
     "accept": "*/*",
@@ -41,6 +48,10 @@ def fetch_page(page: int, profile: str = "chrome120") -> dict:
         impersonate=profile,
         timeout=30,
     )
+    if response.status_code in (429, 403) and "1015" in response.text:
+        print("  Rate limited. Waiting 10 minutes...")
+        time.sleep(600)
+        raise Exception("Rate limited")
     response.raise_for_status()
     return response.json()
 
@@ -98,21 +109,39 @@ def fetch_all() -> list[dict]:
     return all_records
 
 
-def save_to_parquet(records: list[dict]) -> None:
+def upload_to_s3(records: list[dict]) -> str:
+    bucket_name = os.getenv("BUCKET_NAME")
+    region_name = os.getenv("REGION_NAME")
+    aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
+    aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
 
     df = pd.DataFrame(records)
     con = duckdb.connect()
     con.execute("CREATE TABLE dpwh AS SELECT * FROM df")
-    con.execute(f"COPY dpwh TO '{OUTPUT_PATH}' (FORMAT PARQUET)")
-    count = con.execute("SELECT COUNT(*) FROM dpwh").fetchone()[0]
+    arrow_table = con.execute("SELECT * FROM dpwh").to_arrow_table()
     con.close()
-    print(f"Saved {count:,} records to {OUTPUT_PATH}")
+
+    buffer = io.BytesIO()
+    pq.write_table(arrow_table, buffer)
+    buffer.seek(0)
+
+    s3_client = boto3.client(
+        "s3",
+        region_name=region_name,
+        aws_access_key_id=aws_access_key,
+        aws_secret_access_key=aws_secret_key,
+    )
+
+    s3_client.upload_fileobj(buffer, bucket_name, S3_KEY)
+    s3_path = f"s3://{bucket_name}/{S3_KEY}"
+    print(f"Uploaded to {s3_path}")
+    return s3_path
 
 
 if __name__ == "__main__":
     print("Starting DPWH full extraction...\n")
     records = fetch_all()
     print(f"\nExtraction complete. Total records: {len(records):,}")
-    print("Saving to parquet...")
-    save_to_parquet(records)
+    print("Uploading to S3...")
+    upload_to_s3(records)
     print("Done.")
