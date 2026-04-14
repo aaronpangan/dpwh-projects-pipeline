@@ -1,0 +1,12 @@
+deployments:
+- name: "DPWH-pipeline-deployment"
+  description: "Monthly ingestion of dpwh projects to s3 and snowflake"
+  version: "1.0.0"
+  tags: ["prod", "philippines"]
+  schedule:
+    cron: "1 0 1 * *"
+    timezone: "Asia/Manila"
+  flow_name: "DPWH-Projects-Pipeline"
+  entrypoint: "orchestration/src/main.py:dpwh_flow"
+  work_pool:
+    name: "earthquake-pipeline-pool"

@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: raw
+    database: DPWH_PROJECTS_DB
+    schema: RAW
+    tables:
+      - name: RAW_DPWH_PROJECTS
+        description: "Raw DPWH infrastructure projects loaded from the DPWH Transparency Portal API via S3"
