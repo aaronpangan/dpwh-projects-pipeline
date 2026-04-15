@@ -10,12 +10,11 @@ from prefect import get_run_logger
 
 load_dotenv()
 
-logger = get_run_logger()
-
 S3_KEY = "raw/dpwh_projects_raw.parquet"
 
 
 def upload_to_s3(records: list[dict]) -> str:
+    logger = get_run_logger()
     bucket_name = os.getenv("PROJECT_BUCKET_NAME")
     region_name = os.getenv("REGION_NAME")
     aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")

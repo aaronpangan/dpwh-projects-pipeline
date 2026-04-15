@@ -6,8 +6,6 @@ from prefect import get_run_logger
 
 load_dotenv()
 
-logger = get_run_logger()
-
 TRUNCATE_STAGING = "TRUNCATE TABLE RAW_DPWH_PROJECTS_STAGING"
 
 COPY_INTO_STAGING = """
@@ -123,6 +121,7 @@ MERGE_INTO_RAW = """
 
 
 def load_to_snowflake() -> None:
+    logger = get_run_logger()
     conn = snowflake.connector.connect(
         user=os.getenv("SNOWFLAKE_USER"),
         password=os.getenv("SNOWFLAKE_PASSWORD"),

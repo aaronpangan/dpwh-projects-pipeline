@@ -7,8 +7,6 @@ from prefect import get_run_logger
 
 load_dotenv()
 
-logger = get_run_logger()
-
 BASE_URL = os.getenv("DPWH_BASE_URL")
 LIMIT = 5000
 DELAY_SECONDS = 3
@@ -38,6 +36,7 @@ TLS_PROFILES = [
 
 
 def fetch_page(page: int, profile: str = "chrome120") -> dict:
+    logger = get_run_logger()
     response = requests.get(
         BASE_URL,
         params={"page": page, "limit": LIMIT},
@@ -54,6 +53,7 @@ def fetch_page(page: int, profile: str = "chrome120") -> dict:
 
 
 def fetch_with_retry(page: int) -> list[dict] | None:
+    logger = get_run_logger()
     for profile in TLS_PROFILES:
         try:
             data = fetch_page(page, profile)
@@ -70,6 +70,7 @@ def fetch_with_retry(page: int) -> list[dict] | None:
 
 
 def get_total_pages() -> int:
+    logger = get_run_logger()
     logger.info("Fetching page 1 to get total count...")
     data = fetch_page(1)
     pagination = data["data"]["pagination"]
@@ -81,6 +82,7 @@ def get_total_pages() -> int:
 
 
 def fetch_dpwh_data() -> list[dict]:
+    logger = get_run_logger()
     total_pages = get_total_pages()
     all_records = []
     failed_pages = []
