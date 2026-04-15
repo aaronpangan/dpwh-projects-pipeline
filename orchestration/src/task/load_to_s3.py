@@ -6,8 +6,11 @@ import duckdb
 import pandas as pd
 import pyarrow.parquet as pq
 from dotenv import load_dotenv
+from prefect import get_run_logger
 
 load_dotenv()
+
+logger = get_run_logger()
 
 S3_KEY = "raw/dpwh_projects_raw.parquet"
 
@@ -37,5 +40,5 @@ def upload_to_s3(records: list[dict]) -> str:
 
     s3_client.upload_fileobj(buffer, bucket_name, S3_KEY)
     s3_path = f"s3://{bucket_name}/{S3_KEY}"
-    print(f"Uploaded to {s3_path}")
+    logger.info(f"Uploaded to {s3_path}")
     return s3_path

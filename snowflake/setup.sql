@@ -32,7 +32,7 @@ GRANT OWNERSHIP ON FUTURE TABLES IN SCHEMA DPWH_PROJECTS_DB.PROD TO ROLE DATA_EN
 -- ------------------------------------------------------------
 
 CREATE OR REPLACE STAGE DPWH_PROJECTS_DB.RAW.DPWH_PROJECTS_STAGE
-    URL = 's3://dpwh-projects-s3-bucket-126961545681-ap-southeast-1-an/raw/'
+    URL = 's3://dpwh-projects-126961545681-us-west-2-an/raw/'
     CREDENTIALS = (
         AWS_KEY_ID = 'YOUR_AWS_KEY_ID'
         AWS_SECRET_KEY = 'YOUR_AWS_SECRET_KEY'

@@ -3,8 +3,11 @@ import time
 
 import curl_cffi.requests as requests
 from dotenv import load_dotenv
+from prefect import get_run_logger
 
 load_dotenv()
+
+logger = get_run_logger()
 
 BASE_URL = os.getenv("DPWH_BASE_URL")
 LIMIT = 5000
@@ -43,7 +46,7 @@ def fetch_page(page: int, profile: str = "chrome120") -> dict:
         timeout=30,
     )
     if response.status_code in (429, 403) and "1015" in response.text:
-        print("  Rate limited. Waiting 10 minutes...")
+        logger.info("  Rate limited. Waiting 10 minutes...")
         time.sleep(600)
         raise Exception("Rate limited")
     response.raise_for_status()
@@ -61,19 +64,19 @@ def fetch_with_retry(page: int) -> list[dict] | None:
                 del r["location"]
             return records
         except Exception as e:
-            print(f"  Page {page} failed with {profile}: {e}")
+            logger.warning(f"  Page {page} failed with {profile}: {e}")
             time.sleep(5)
     return None
 
 
 def get_total_pages() -> int:
-    print("Fetching page 1 to get total count...")
+    logger.info("Fetching page 1 to get total count...")
     data = fetch_page(1)
     pagination = data["data"]["pagination"]
     total_count = pagination["totalCount"]
     total_pages = -(-total_count // LIMIT)
-    print(f"Total projects : {total_count:,}")
-    print(f"Total pages    : {total_pages} (at {LIMIT} per page)")
+    logger.info(f"Total projects : {total_count:,}")
+    logger.info(f"Total pages    : {total_pages} (at {LIMIT} per page)")
     return total_pages
 
 
@@ -86,17 +89,17 @@ def fetch_dpwh_data() -> list[dict]:
         records = fetch_with_retry(page)
         if records:
             all_records.extend(records)
-            print(
+            logger.info(
                 f"[{page}/{total_pages}] fetched {len(records)} — total: {len(all_records):,}"
             )
         else:
             failed_pages.append(page)
-            print(f"[{page}/{total_pages}] permanently failed, skipping")
+            logger.warning(f"[{page}/{total_pages}] permanently failed, skipping")
 
         time.sleep(DELAY_SECONDS)
 
     if failed_pages:
-        print(f"\nFailed pages: {failed_pages}")
+        logger.warning(f"\nFailed pages: {failed_pages}")
         with open("failed_pages.txt", "w") as f:
             f.write("\n".join(map(str, failed_pages)))
 

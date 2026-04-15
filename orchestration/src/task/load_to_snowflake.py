@@ -2,8 +2,11 @@ import os
 
 import snowflake.connector
 from dotenv import load_dotenv
+from prefect import get_run_logger
 
 load_dotenv()
+
+logger = get_run_logger()
 
 TRUNCATE_STAGING = "TRUNCATE TABLE RAW_DPWH_PROJECTS_STAGING"
 
@@ -131,15 +134,15 @@ def load_to_snowflake() -> None:
     )
     cur = conn.cursor()
 
-    print("Truncating staging table...")
+    logger.info("Truncating staging table...")
     cur.execute(TRUNCATE_STAGING)
 
-    print("Loading parquet from S3 into staging...")
+    logger.info("Loading parquet from S3 into staging...")
     cur.execute(COPY_INTO_STAGING)
 
-    print("Merging staging into raw table...")
+    logger.info("Merging staging into raw table...")
     cur.execute(MERGE_INTO_RAW)
 
     cur.close()
     conn.close()
-    print("Snowflake load complete")
+    logger.info("Snowflake load complete")
