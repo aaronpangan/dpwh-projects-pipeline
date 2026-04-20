@@ -28,4 +28,5 @@ build/
 # Environment
 .env
 .env.local
-
+dbt.py
+diagram.png
