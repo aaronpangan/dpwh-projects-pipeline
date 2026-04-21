@@ -1,4 +1,4 @@
--- models/marts/dim_component_categories.sql
+-- models/marts/dim_categories.sql
 with categories (component_category, category_sort_order, category_description) as (
     select * from (values
         ('Bridges', 1, 'Bridge infrastructure projects.'),

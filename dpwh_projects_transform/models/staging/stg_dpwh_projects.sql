@@ -22,10 +22,6 @@ staged as (
         amountpaid::float                       as amount_paid,
 
         -- contractor
-        trim(split_part(contractor, '(', 1))    as contractor_name,
-        trim(
-            replace(split_part(contractor, '(', 2), ')', '')
-        )                                       as contractor_code,
         contractor                              as contractor_raw,
 
         -- location
