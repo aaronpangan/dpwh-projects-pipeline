@@ -5,6 +5,7 @@
 target/
 dbt_packages/
 logs/
+package-lock.yml
 
 # IDE
 .vscode/
