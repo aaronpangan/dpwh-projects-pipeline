@@ -1,6 +1,6 @@
 import subprocess
 
-from prefect import flow, task
+from prefect import flow, get_run_logger, task
 from task.extract import fetch_dpwh_data
 from task.load_to_s3 import upload_to_s3
 from task.load_to_snowflake import load_to_snowflake
@@ -19,7 +19,15 @@ def snowflake_task() -> None:
 
 @task(name="run-dbt-models", retries=1, retry_delay_seconds=30)
 def dbt_task() -> None:
-    subprocess.run(["dbt", "run"], cwd="dpwh_projects_transform", check=True)
+    logger = get_run_logger()
+    cwd = "dpwh_projects_transform"
+
+    for cmd in [["dbt", "deps"], ["dbt", "run"]]:
+        result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
+        logger.info(result.stdout)
+        if result.returncode != 0:
+            logger.error(result.stderr)
+            raise Exception(f"{' '.join(cmd)} failed:\n{result.stderr}")
 
 
 @flow(name="DPWH-Projects-Pipeline")
