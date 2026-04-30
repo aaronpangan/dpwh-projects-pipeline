@@ -33,7 +33,6 @@ staged as (
         try_to_date(startdate)                  as start_date,
         try_to_date(completiondate)             as completion_date,
 
-    
         -- metadata
         last_updated_at,
 
@@ -48,7 +47,9 @@ staged as (
         case
             when status = 'Completed' and progress < 100
             then true
-            when status != 'Completed' and try_to_date(completiondate) < current_date()
+            when status != 'Completed'
+                and try_to_date(completiondate) is not null
+                and try_to_date(completiondate) < current_date()
             then true
             else false
         end                                     as is_delayed,
@@ -56,16 +57,18 @@ staged as (
         case
             when progress = 0
                 and budget > 0
-                and status not in ('For Procurement', 'Not Started')
+                and status not in ('For Procurement', 'Not Yet Started', 'Terminated')
+                and (try_to_date(startdate) is null or try_to_date(startdate) <= current_date())
             then true
             else false
         end                                     as is_ghost_project,
 
         case
-            when budget < 1000000           then 'Small'
-            when budget < 10000000          then 'Medium'
-            when budget < 100000000         then 'Large'
-            else                                 'Major'
+            when budget = 0 or budget is null  then 'No Budget'
+            when budget < 1000000              then 'Small'
+            when budget < 10000000             then 'Medium'
+            when budget < 100000000            then 'Large'
+            else                                    'Major'
         end                                     as budget_tier,
 
         case
