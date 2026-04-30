@@ -19,7 +19,6 @@ staged as (
         status                                  as project_status,
         progress::float                         as progress_pct,
         budget::float                           as budget_amount,
-        amountpaid::float                       as amount_paid,
 
         -- contractor
         contractor                              as contractor_raw,
@@ -34,16 +33,7 @@ staged as (
         try_to_date(startdate)                  as start_date,
         try_to_date(completiondate)             as completion_date,
 
-        -- livestream
-        islive                                  as is_live,
-        livestreamurl                           as livestream_url,
-        livestreamvideoid                       as livestream_video_id,
-        livestreamdetectedat                    as livestream_detected_at,
-
-        -- reporting
-        reportcount::integer                    as report_count,
-        hassatelliteimage                       as has_satellite_image,
-
+    
         -- metadata
         last_updated_at,
 
