@@ -72,13 +72,21 @@ def fetch_with_retry(page: int) -> list[dict] | None:
 def get_total_pages() -> int:
     logger = get_run_logger()
     logger.info("Fetching page 1 to get total count...")
-    data = fetch_page(1)
-    pagination = data["data"]["pagination"]
-    total_count = pagination["totalCount"]
-    total_pages = -(-total_count // LIMIT)
-    logger.info(f"Total projects : {total_count:,}")
-    logger.info(f"Total pages    : {total_pages} (at {LIMIT} per page)")
-    return total_pages
+
+    for profile in TLS_PROFILES:
+        try:
+            data = fetch_page(1, profile)
+            pagination = data["data"]["pagination"]
+            total_count = pagination["totalCount"]
+            total_pages = -(-total_count // LIMIT)
+            logger.info(f"Total projects : {total_count:,}")
+            logger.info(f"Total pages    : {total_pages} (at {LIMIT} per page)")
+            return total_pages
+        except Exception as e:
+            logger.warning(f"  Page 1 failed with {profile}: {e}")
+            time.sleep(5)
+
+    raise Exception("All TLS profiles failed on page 1")
 
 
 def fetch_dpwh_data() -> list[dict]:
