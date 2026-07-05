@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: int_contractors_parsed
+    description: >
+      Flattens contractor_raw into one row per (contract_id, contractor). Joint
+      ventures delimited by ' / ' are split; each segment yields a cleaned
+      contractor_name, contractor_code, and 1-based position. contractor_pk is a
+      surrogate key hashed from contractor_name. Feeds dim_contractors and
+      brg_contractors.
+    columns:
+      - name: contract_id
+        description: "Contract the contractor segment belongs to (not unique here)."
+        tests:
+          - not_null
+      - name: contractor_pk
+        description: "Surrogate key from dbt_utils.generate_surrogate_key(['contractor_name'])."
+        tests:
+          - not_null
+      - name: position
+        description: "1-based order within the joint venture; position 1 is the lead contractor."
+      - name: contractor_segment
+        description: "The raw single-contractor substring before parsing."
+      - name: contractor_name
+        description: "Uppercased contractor name with the trailing (code) stripped."
+      - name: contractor_code
+        description: "Numeric code extracted from the parentheses in the segment."
+      - name: contractor_raw
+        description: "Original unparsed contractor string, carried through for traceability."

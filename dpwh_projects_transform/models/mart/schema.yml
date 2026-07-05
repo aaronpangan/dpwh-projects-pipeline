@@ -1,0 +1,86 @@
+version: 2
+
+models:
+  - name: mart_budget_by_location
+    description: >
+      Province-grain summary: project counts, budget, and performance rates by
+      island group / region / province. Aggregated from fct_projects joined to
+      dim_locations, so budget is counted once per project (no fan-out).
+    columns:
+      - name: province_name
+        description: "Cleaned province / executing office name."
+      - name: total_projects
+        description: "Distinct projects in the province."
+      - name: total_budget
+        description: "Sum of budget_amount across the province's projects."
+      - name: completion_rate_pct
+        description: "completed_projects / total_projects * 100."
+
+  - name: mart_budget_by_category
+    description: >
+      Category-grain summary via the brg_project_categories bridge. Multi-category
+      projects credit their FULL budget to every category they touch, so summing
+      total_budget across rows exceeds the true portfolio total (documented,
+      intentional attribution).
+    columns:
+      - name: component_category
+        description: "Infrastructure category. One row each."
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              to: ref('dim_categories')
+              field: component_category
+      - name: total_projects
+        description: "Distinct projects tagged with this category."
+      - name: total_budget
+        description: "Sum of budget_amount (full-attribution per category)."
+      - name: completion_rate_pct
+        description: "completed_projects / total_projects * 100."
+
+  - name: mart_contractor_performance
+    description: >
+      Contractor-grain summary via the brg_contractors bridge. Joint ventures
+      credit the FULL budget to each contractor, so total_budget across rows
+      exceeds the true portfolio total (documented, intentional attribution).
+    columns:
+      - name: contractor_pk
+        description: "Contractor surrogate key. One row each."
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              to: ref('dim_contractors')
+              field: contractor_pk
+      - name: total_projects
+        description: "Distinct contracts the contractor was party to."
+      - name: lead_contractor_projects
+        description: "Contracts where the contractor was the lead (position = 1)."
+      - name: joint_venture_projects
+        description: "Contracts where the contractor was a non-lead JV partner (position > 1)."
+      - name: completion_rate_pct
+        description: "completed_projects / total_projects * 100."
+
+  - name: mart_projects_overview
+    description: >
+      Flat, BI-friendly explore table at project grain. Joins fct_projects to
+      location detail and collapses the contractor and category bridges into
+      delimited strings so one row per contract_id is preserved.
+    columns:
+      - name: contract_id
+        description: "Primary key. Project grain preserved."
+        tests:
+          - unique
+          - not_null
+      - name: location_key
+        description: "FK to dim_locations."
+        tests:
+          - relationships:
+              to: ref('dim_locations')
+              field: location_key
+      - name: component_categories
+        description: "Comma-delimited list of the project's categories."
+      - name: contractor_names
+        description: "' / '-delimited list of the project's contractors."
+      - name: is_joint_venture
+        description: "True when more than one contractor is attached."

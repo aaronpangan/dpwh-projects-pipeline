@@ -6,7 +6,7 @@ target/
 dbt_packages/
 logs/
 package-lock.yml
-
+docs
 # IDE
 .vscode/
 .idea/
@@ -30,4 +30,4 @@ build/
 .env
 .env.local
 dbt.py
-diagram.png
+docs

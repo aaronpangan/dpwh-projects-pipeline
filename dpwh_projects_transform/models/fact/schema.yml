@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: fct_projects
+    description: >
+      Central fact at project grain — exactly one row per contract_id. Carries
+      degenerate dimensions, measures, dates, and the staging-derived flags, plus
+      the location_key FK. Never add many-to-many keys (contractor, category)
+      here; those live in the bridges.
+    columns:
+      - name: contract_id
+        description: "Primary key. Enforces project grain."
+        tests:
+          - unique
+          - not_null
+      - name: location_key
+        description: "FK to dim_locations. md5 of raw region || province."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_locations')
+              field: location_key
+      - name: project_description
+        description: "Free-text project name/description."
+      - name: project_category
+        description: "Single high-level category string from the source."
+      - name: program_name
+        description: "DPWH program the contract falls under."
+      - name: source_of_funds
+        description: "Funding source for the contract."
+      - name: project_status
+        description: "Lifecycle status."
+      - name: infra_year
+        description: "Infrastructure program year."
+      - name: budget_amount
+        description: "Approved budget in PHP."
+      - name: progress_pct
+        description: "Reported physical progress, 0-100."
+      - name: duration_days
+        description: "completion_date - start_date in days; null when a date is missing."
+      - name: start_date
+        description: "Contract start date."
+      - name: completion_date
+        description: "Contract completion date."
+      - name: is_delayed
+        description: "Delay flag derived in staging."
+      - name: is_ghost_project
+        description: "Ghost/stalled flag derived in staging."
+      - name: is_completed
+        description: "True when status = 'Completed'."
+      - name: budget_tier
+        description: "Bucketed budget size."
+        tests:
+          - accepted_values:
+              values: ['No Budget', 'Small', 'Medium', 'Large', 'Major']
+      - name: project_url
+        description: "Deep link to the DPWH transparency portal for this contract."
+      - name: last_updated_at
+        description: "Timestamp the underlying RAW row last changed."

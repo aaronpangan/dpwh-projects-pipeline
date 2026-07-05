@@ -1,0 +1,67 @@
+version: 2
+
+models:
+  - name: stg_dpwh_projects
+    description: >
+      Cleaned, typed, one-row-per-contract view over RAW_DPWH_PROJECTS. Renames
+      source columns to snake_case, casts types, and derives the boolean flags
+      and budget tier that flow downstream unchanged. The only consumer of
+      source(); everything else refs this model. Materialized as a view.
+    columns:
+      - name: contract_id
+        description: "Primary key. Unique DPWH contract identifier (source contractid)."
+        tests:
+          - unique
+          - not_null
+      - name: project_description
+        description: "Free-text project name/description."
+      - name: project_category
+        description: "Single high-level category string from the source (category)."
+      - name: component_categories
+        description: >
+          Raw comma-delimited list of infrastructure categories. Exploded
+          downstream in brg_project_categories; do not parse here.
+      - name: program_name
+        description: "DPWH program the contract falls under."
+      - name: source_of_funds
+        description: "Funding source for the contract."
+      - name: infra_year
+        description: "Infrastructure program year (integer)."
+      - name: project_status
+        description: "Lifecycle status (e.g. Completed, On-Going, For Procurement, Terminated)."
+      - name: progress_pct
+        description: "Reported physical progress, 0-100."
+      - name: budget_amount
+        description: "Approved budget in PHP (float)."
+      - name: contractor_raw
+        description: >
+          Only trustworthy contractor field. Joint ventures look like
+          'FOO INC. (123) / BAR CORP (456)' and are parsed in
+          int_contractors_parsed. Do not derive name/code here.
+      - name: province
+        description: "Raw province / executing office string from the source."
+      - name: region
+        description: "Raw region string from the source."
+      - name: latitude
+        description: "Project latitude (float)."
+      - name: longitude
+        description: "Project longitude (float)."
+      - name: start_date
+        description: "Parsed contract start date (try_to_date)."
+      - name: completion_date
+        description: "Parsed contract completion date (try_to_date)."
+      - name: last_updated_at
+        description: "Timestamp the row last changed in RAW (set by the MERGE load)."
+      - name: duration_days
+        description: "completion_date - start_date in days; null when either date is missing."
+      - name: is_delayed
+        description: "Completed with progress < 100, OR past completion_date and not Completed."
+      - name: is_ghost_project
+        description: "Zero progress but funded and past start — flags likely stalled/ghost contracts."
+      - name: budget_tier
+        description: "Bucketed budget size."
+        tests:
+          - accepted_values:
+              values: ['No Budget', 'Small', 'Medium', 'Large', 'Major']
+      - name: is_completed
+        description: "True when project_status = 'Completed'."

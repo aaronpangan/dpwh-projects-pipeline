@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: brg_project_categories
+    description: >
+      Many-to-many bridge between projects and categories. One row per
+      (contract_id, component_category). Has MORE rows than staging because
+      multi-category projects expand — this is expected, not duplication. Never
+      sum budget directly on this table; join to fct_projects first.
+    columns:
+      - name: contract_id
+        description: "Project key (not unique — a project may touch several categories)."
+        tests:
+          - not_null
+      - name: component_category
+        description: "Category key. Always resolves to an official dim_categories value."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_categories')
+              field: component_category
+
+  - name: brg_contractors
+    description: >
+      Many-to-many bridge between projects and contractors. One row per
+      (contract_id, contractor_pk) with the joint-venture position. Never sum
+      budget directly on this table; join to fct_projects first.
+    columns:
+      - name: contract_id
+        description: "Project key (not unique — joint ventures give a project several rows)."
+        tests:
+          - not_null
+      - name: contractor_pk
+        description: "Contractor key."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_contractors')
+              field: contractor_pk
+      - name: position
+        description: "1-based order in the joint venture; 1 = lead contractor."

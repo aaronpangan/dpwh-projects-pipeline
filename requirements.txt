@@ -7,3 +7,5 @@ python-dotenv>=1.0.0
 prefect>=3.0.0
 snowflake-connector-python
 boto3
+streamlit
+plotly

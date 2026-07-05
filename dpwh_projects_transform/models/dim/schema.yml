@@ -1,0 +1,62 @@
+version: 2
+
+models:
+  - name: dim_locations
+    description: >
+      One row per distinct (region, raw province) pair. Cleans DEO suffixes,
+      classifies UPMO/central-office and regional-level executing offices, and
+      rolls regions up to island groups. location_key is md5(region || province)
+      on the RAW values so it matches the same hash computed in fct_projects.
+    columns:
+      - name: location_key
+        description: "Primary key. md5 of raw region || province. Joins to fct_projects.location_key."
+        tests:
+          - unique
+          - not_null
+      - name: island_group
+        description: "Luzon / Visayas / Mindanao / National / Central Office / Unknown."
+      - name: region
+        description: "DPWH region name (raw)."
+      - name: province_name
+        description: "Cleaned province / office name (DEO suffixes stripped, init-capped)."
+      - name: executing_office
+        description: "Original raw province string before cleanup."
+      - name: is_upmo
+        description: "True for UPMO / Central Office rows (cluster/bureau)."
+      - name: is_regional_level
+        description: "True for regional-office / multi-province rows."
+
+  - name: dim_categories
+    description: >
+      Static reference of the seven official infrastructure categories, including
+      the 'Uncategorized' fallback used for unmatched/consultancy components.
+    columns:
+      - name: component_category
+        description: "Primary key. Official category name."
+        tests:
+          - unique
+          - not_null
+      - name: category_sort_order
+        description: "Display ordering, 1-7."
+        tests:
+          - unique
+          - not_null
+      - name: category_description
+        description: "Human-readable description of the category."
+
+  - name: dim_contractors
+    description: >
+      One row per distinct contractor (deduplicated from int_contractors_parsed
+      on contractor_pk / name / code).
+    columns:
+      - name: contractor_pk
+        description: "Primary key. Surrogate key hashed from contractor_name."
+        tests:
+          - unique
+          - not_null
+      - name: contractor_name
+        description: "Uppercased contractor name."
+      - name: contractor_code
+        description: >
+          Representative contractor code. A few contractors appear under more
+          than one code; one is kept here since contractor_pk is name-based.
